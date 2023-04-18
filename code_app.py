@@ -188,14 +188,7 @@ def full_initialisation():
 
     artist_features['int_artist_id'] = artist_features['artist_id'].map(mapping)
 
-    #changes to spot_600
-    def change_spot_id_artist(x, mapping):
-        """
-        !!! Here if an artist is not in the artist db, it disepear from spot featuring list
-        """
-        changed = [mapping[idd] for idd in x if idd in mapping.keys()]
-        return changed
-        
+
     spot_600['artist_1'] = spot_600['artist_1'].map(mapping)
     spot_600['artist_2'] = spot_600['artist_2'].map(mapping)
 
@@ -403,10 +396,18 @@ if st.button('Display the predictions'):
                     spring_length=110, spring_strength=0.10,
                     damping=0.95)
 
-    path = './html_files'
-    artist_net.save_graph(f'{path}/pyvis_graph_pred.html')
-    # artist_net.show(f'{path}/pyvis_graph_pred.html', notebook=False)
-    HtmlFile = open(f'{path}/pyvis_graph_pred.html', 'r', encoding='utf-8')
+    try:
+        path = '/tmp'
+        artist_net.save_graph(f'{path}/pyvis_graph.html')
+        HtmlFile = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+        print('tmp')
+
+    # Save and read graph as HTML file (locally)
+    except:
+        path = './html_files'
+        artist_net.save_graph(f'{path}/pyvis_graph.html')
+        HtmlFile = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
+
     # print(artist_net)
     # Load HTML file in HTML component for display on Streamlit page
     # print(HtmlFile)

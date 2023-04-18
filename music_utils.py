@@ -156,7 +156,7 @@ def artists_features_creation(artists_600, spotify_600, DATA_PATH, read=True,
                                                          how='left')
 
         ##### SAVE
-        artists_600_features.to_pickle(DATA_PATH + pkl_features_artist_path)
+        # artists_600_features.to_pickle(DATA_PATH + pkl_features_artist_path)
 
     return artists_600_features
 
