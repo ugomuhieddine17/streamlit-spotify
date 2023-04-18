@@ -10,7 +10,6 @@ streamlit-folium==0.11.1
 streamlit_folium==0.11.1
 torch==1.12.1
 torch-geometric==2.2.0
-torch-geometric-temporal==0.54.0
 torch-sparse==0.6.16
 torch-scatter==2.1.0
 pyvis==0.3.2
