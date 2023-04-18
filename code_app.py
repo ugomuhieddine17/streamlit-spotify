@@ -209,6 +209,7 @@ def full_initialisation():
     df_featurings['artist_2_name'] = df_featurings.artist_2.map(int_to_name)
 
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
+    node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
     return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features
 
@@ -348,7 +349,7 @@ with st.sidebar:
 if st.button('Display the predictions'):
     test_data = test_Data_construction(df_select, node_features)
     st.markdown('coucou')
-    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized.pt',  map_location='cpu')
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
     print(model)
     # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt',  map_location='cpu')
     test_pred = model(test_data.x, test_data.y_indices)
