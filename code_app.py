@@ -371,7 +371,7 @@ if st.button('Display the predictions'):
     # if len(choice) == 0:
     #     st.table(edge_df.sort_values(by='probability')[:3])
     # else:
-    st.table(edge_df.sort_values(by='probability', ascending=False)[:10])
+    
 
     #################
     ### THE GRAPH ###
@@ -390,7 +390,7 @@ if st.button('Display the predictions'):
 
         artist_net.add_node(src, src, title=src, font_size=60)
         artist_net.add_node(dst, dst, title=dst, font='60px arial black')
-        if proba < 0.3:
+        if proba < 0.5:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#f4cccc", width=round(proba*10)+4)
         else:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#05BFDB", width=round(proba*10)+4)
@@ -420,23 +420,7 @@ if st.button('Display the predictions'):
     raw_html = base64.b64encode(raw_html).decode()
     components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
 
-    # try:
-    #     path = '/tmp'
-    #     artist_net.save_graph(f'{path}/pyvis_graph.html')
-    #     HtmlFile = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-    #     print('tmp')
-
-    # # Save and read graph as HTML file (locally)
-    # except:
-    #     path = './html_files'
-    #     artist_net.save_graph(f'{path}/pyvis_graph.html')
-    #     HtmlFile = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-
-    # Load HTML file in HTML component for display on Streamlit page
-    print(HtmlFile)
-    raw_html = HtmlFile.read().encode("utf-8")
-    raw_html = base64.b64encode(raw_html).decode()
-    components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
+    st.table(edge_df.sort_values(by='probability', ascending=False)[:30])
 
 
 
