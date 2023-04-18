@@ -347,7 +347,7 @@ with st.sidebar:
 # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
 if st.button('Display the predictions'):
     test_data = test_Data_construction(df_select, node_features)
-    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt')
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized.pt')
     test_pred = model(test_data.x, test_data.y_indices)
     proba_featuring = test_pred[:,1].tolist()
     sources = test_data.y_indices[0,:].tolist()
