@@ -348,9 +348,9 @@ with st.sidebar:
 if st.button('Display the predictions'):
     test_data = test_Data_construction(df_select, node_features)
     st.markdown('coucou')
-    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized.pt')
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized.pt',  map_location='cpu')
     print(model)
-    # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt')
+    # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt',  map_location='cpu')
     test_pred = model(test_data.x, test_data.y_indices)
     proba_featuring = test_pred[:,1].tolist()
     proba_featuring = [round(prob,3) for prob in proba_featuring]
