@@ -391,9 +391,9 @@ if st.button('Display the predictions'):
         artist_net.add_node(src, src, title=src, font_size=60)
         artist_net.add_node(dst, dst, title=dst, font='60px arial black')
         if proba < 0.5:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#f4cccc", width=round(proba*10)+4)
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#f4cccc", width=round(proba**2*15)+1)
         else:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#05BFDB", width=round(proba*10)+4)
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#05BFDB", width=round(proba**2*15)+1)
 
 
 
