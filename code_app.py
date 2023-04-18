@@ -420,7 +420,7 @@ if st.button('Display the predictions'):
     raw_html = base64.b64encode(raw_html).decode()
     components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
 
-    st.table(edge_df.sort_values(by='probability', ascending=False)[:30])
+    st.table(edge_df.sort_values(by='probability', ascending=True)[:30])
 
 
 
