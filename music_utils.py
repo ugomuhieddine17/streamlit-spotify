@@ -54,8 +54,8 @@ def nodes_featuring(df_song, DATA_PATH, read=True, path='edge_list_600k.pkl'):
 def read_spotify_600(DATA_PATH, read=True,
                      spotify_path='tracks_600k.csv',
                      artists_path='artists_600k.csv',
-                     pkl_spotify_path='tracks_600k_processed_2.pkl',
-                     pkl_artists_path='artists_600k_processed_2.pkl',
+                     pkl_spotify_path='tracks_600k_processed.pkl',
+                     pkl_artists_path='artists_600k_processed.pkl',
                      ):
     """
     :param DATA_PATH: where to find or save data
