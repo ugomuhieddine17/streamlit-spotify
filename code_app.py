@@ -323,6 +323,14 @@ with st.sidebar:
         "What graph do you want to display?",
         ('Direct connections', 'Propagated connections (order 2)', 'Genres'))
 
+    begin_date = st.date_input(
+    "Begin date for validation",
+    date(2010, 1, 1))
+    
+    end_date = st.date_input(
+    "End date for validation",
+    date(2011, 1, 1))
+    
     if graph_type != 'Genres':
         # Implement multiselect dropdown menu for option selection (returns a list)
         selected_artists = st.multiselect('Select artist(s) to visualize', artist_list)
@@ -359,27 +367,18 @@ with st.sidebar:
             df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
                                         df_featurings['artist_2_name'].isin(selected_artists)]
             df_select = df_select.reset_index(drop=True)
-
-
-    begin_date = st.date_input(
-    "Begin date for validation",
-    date(2010, 1, 1))
-    
-    end_date = st.date_input(
-    "End date for validation",
-    date(2011, 1, 1))
-
-    try: 
-        labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
-        labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
-        labels_df['done_feat'] = (labels_df.num_feats >= 1).int()
-        st.markdown(labels_df.head())
-        df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
-                            on=['artist_1', 'artist_2'],
-                            how='left'
+            
+            labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
+            labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
+            labels_df['done_feat'] = (labels_df.num_feats >= 1).int()
+            st.markdown(labels_df.head())
+            df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
+                                on=['artist_1', 'artist_2'],
+                                how='left'
                             )
-    except:
-        st.markdown('select something bitch')
+
+
+
 #plot the most probable featurings
 # 
 
