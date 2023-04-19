@@ -331,8 +331,8 @@ with st.sidebar:
     "End date for validation",
     date(2011, 1, 1))
 
-    begin_date = datetime.strptime(begin_date, "%Y-%m-%d %H:%M:%S")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+    begin_date = np.datetime64(begin_date)
+    end_date = np.datetime64(end_date)
 
     if graph_type != 'Genres':
         # Implement multiselect dropdown menu for option selection (returns a list)
