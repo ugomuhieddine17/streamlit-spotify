@@ -330,7 +330,7 @@ with st.sidebar:
     end_date = st.date_input(
     "End date for validation",
     date(2011, 1, 1))
-    
+
     if graph_type != 'Genres':
         # Implement multiselect dropdown menu for option selection (returns a list)
         selected_artists = st.multiselect('Select artist(s) to visualize', artist_list)
@@ -344,6 +344,14 @@ with st.sidebar:
                 df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
                                             df_featurings['artist_2_name'].isin(selected_artists)]
                 df_select = df_select.reset_index(drop=True)
+                labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
+                labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
+                labels_df['done_feat'] = (labels_df.num_feats >= 1).int()
+                st.markdown(labels_df.head())
+                df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
+                                    on=['artist_1', 'artist_2'],
+                                    how='left'
+                                )
                 
             else:
                 df_pre_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
@@ -354,6 +362,15 @@ with st.sidebar:
 
                 df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(propagated_list) | \
                                             df_featurings['artist_2_name'].isin(propagated_list)]
+                
+                labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
+                labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
+                labels_df['done_feat'] = (labels_df.num_feats >= 1).int()
+                st.markdown(labels_df.head())
+                df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
+                                    on=['artist_1', 'artist_2'],
+                                    how='left'
+                            )
 
     elif graph_type == 'Genres':
         selected_genres = st.multiselect('Select Genre(s) to visualize', genres_list)
@@ -377,7 +394,7 @@ with st.sidebar:
                                 how='left'
                             )
 
-
+    st.table(df_select.head())
 
 #plot the most probable featurings
 # 
