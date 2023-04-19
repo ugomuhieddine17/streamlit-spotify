@@ -224,7 +224,7 @@ def test_Data_construction(df_select, node_features):
     Returns:
         pytorch geometric Data: the test Data object
     """
-    st.table(df_select.head(30))
+    
     edge_list = torch.from_numpy(np.array(df_select[['artist_1','artist_2']].values).transpose())
     edge_attr = torch.from_numpy(np.array(df_select.num_feats.values).transpose())
     test_data = Data(x=torch.from_numpy(node_features).float(), 
@@ -359,6 +359,8 @@ with st.sidebar:
 
 # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
 if st.button('Display the predictions'):
+    st.table(df_select.head())
+    print('bjr')
     test_data = test_Data_construction(df_select, node_features)
     model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
     # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt',  map_location='cpu')
