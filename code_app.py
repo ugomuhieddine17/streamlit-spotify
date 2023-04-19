@@ -169,6 +169,7 @@ def full_initialisation():
     #features of the artists
     artist_features = artists_features_creation(in_spot_artists_600,
                                             start_date_spotify_600,
+                                            start_date_spotify_600,
                                             DATA_PATH, read=False,
                                             pkl_features_artist_path='features_artists_PYGT_yt_1999.pkl',
                                 ).reset_index()
@@ -211,8 +212,22 @@ def full_initialisation():
 
     model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
 
-    return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model
+    return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600
 
+
+def artist_features_evolving(in_spot_artists_600, start_date_spotify_600, end_date, mapping):
+
+    start_end_spot_600 = start_date_spotify_600[start_date_spotify_600.release_date <= end_date].copy()
+    artist_features = artists_features_creation(in_spot_artists_600,
+                                            start_date_spotify_600,
+                                          start_end_spot_600,
+                                          DATA_PATH, read=False
+                              ).reset_index()
+    artist_features['int_artist_id'] = artist_features['artist_id'].map(mapping)
+    node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
+    node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
+
+    return node_features
 
 def test_Data_construction(df_select, node_features):
     """build the data test obect
@@ -314,7 +329,7 @@ def y_labels_val(spot_600, df_select):
     return df_select
 
 
-mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model = full_initialisation()
+mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600 = full_initialisation()
 
 
 ######################################################
@@ -348,6 +363,8 @@ with st.sidebar:
 
     begin_date = np.datetime64(begin_date)
     end_date = np.datetime64(end_date)
+
+    node_features_val = artist_features_evolving(in_spot_artists_600, start_date_spotify_600, end_date, mapping)
 
     if graph_type != 'Genres':
         # Implement multiselect dropdown menu for option selection (returns a list)
@@ -473,7 +490,7 @@ if st.button('Display the predictions'):
 
 
 if st.button('Display validation set'):
-    val_data = test_Data_construction(df_select, node_features)
+    val_data = test_Data_construction(df_select, node_features_val)
     # val_data.y_indices, val_data.y = neg_sampling(val_data)
     val_proba = model(val_data.x, val_data.y_indices)
     val_pred = torch.argmax(val_proba, dim=1)

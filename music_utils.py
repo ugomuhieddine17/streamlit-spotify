@@ -133,7 +133,7 @@ def read_spotify_600_for_brouillon(DATA_PATH, read=True,
     return spotify_600, artists_600
 
 
-def artists_features_creation(artists_600, spotify_600, DATA_PATH, read=True,
+def artists_features_creation(artists_600, bigger_spot_600, spotify_600, DATA_PATH, read=True,
                               pkl_features_artist_path='features_artists_600k.pkl',
                               ):
     """
@@ -151,7 +151,7 @@ def artists_features_creation(artists_600, spotify_600, DATA_PATH, read=True,
 
     else:
         # we select all the artists that are in the spotify tracks
-        artists_600_features = artists_600[artists_600.artist_id.isin(spotify_600.id_artists.explode().unique())].copy()
+        artists_600_features = artists_600[artists_600.artist_id.isin(bigger_spot_600.id_artists.explode().unique())].copy()
         # features: number of genres
         artists_600_features['num_genres'] = artists_600_features.genres.apply(lambda x: len(x))
         # set artist_id as index
@@ -202,6 +202,7 @@ def artists_features_creation(artists_600, spotify_600, DATA_PATH, read=True,
         # artists_600_features.to_pickle(DATA_PATH + pkl_features_artist_path)
 
     return artists_600_features
+
 
 
 # Yearly featurings functions
