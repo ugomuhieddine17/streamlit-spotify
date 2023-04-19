@@ -309,7 +309,10 @@ def y_labels_val(spot_600, df_select):
                         on=['artist_1_name', 'artist_2_name'],
                         how='left'
                     )
+    df_select.done_feat = df_select.done_feat.fillna(0)
+
     st.markdown('merged selected')
+    st.markdown(sum(df_select.done_feat))
     st.table(df_select.head())
     return df_select
 
