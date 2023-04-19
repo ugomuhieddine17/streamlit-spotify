@@ -304,6 +304,7 @@ def y_labels_val(spot_600, df_select):
     
     labels_df = labels_df.groupby(['artist_1_name', 'artist_2_name']).agg(num_feats=('track_id', 'count')).reset_index()
     labels_df['done_feat'] = labels_df.num_feats.apply(lambda x: 1 if x >= 1 else 0)
+    st.markdown(sum(labels_df.done_feat))
     st.table(labels_df.head())
     df_select = pd.merge(df_select, labels_df[['artist_1_name', 'artist_2_name', 'done_feat']],
                         on=['artist_1_name', 'artist_2_name'],
