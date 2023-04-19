@@ -298,6 +298,16 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
     components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
 
 
+def y_labels_val(spot_600, df_select):
+    labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
+    labels_df = labels_df.groupby(['artist_1_name', 'artist_2_name']).agg(num_feats=('track_id', 'count')).reset_index()
+    labels_df['done_feat'] = (labels_df.num_feats >= 1)
+    st.markdown(labels_df.head())
+    df_select = pd.merge(df_select, labels_df[['artist_1_name', 'artist_2_name', 'done_feat']],
+                        on=['artist_1_name', 'artist_2_name'],
+                        how='left'
+                    )
+    return df_select
 
 mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model = full_initialisation()
 
@@ -347,14 +357,7 @@ with st.sidebar:
                 df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
                                             df_featurings['artist_2_name'].isin(selected_artists)]
                 df_select = df_select.reset_index(drop=True)
-                labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
-                labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
-                labels_df['done_feat'] = (labels_df.num_feats >= 1)
-                st.markdown(labels_df.head())
-                df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
-                                    on=['artist_1', 'artist_2'],
-                                    how='left'
-                                )
+                df_select = y_labels_val(spot_600, df_select)
                 
             else:
                 df_pre_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
@@ -365,16 +368,8 @@ with st.sidebar:
 
                 df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(propagated_list) | \
                                             df_featurings['artist_2_name'].isin(propagated_list)]
+                df_select = y_labels_val(spot_600, df_select)
                 
-                labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
-                labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
-                labels_df['done_feat'] = (labels_df.num_feats >= 1)
-                st.markdown(labels_df.head())
-                df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
-                                    on=['artist_1', 'artist_2'],
-                                    how='left'
-                            )
-
     elif graph_type == 'Genres':
         selected_genres = st.multiselect('Select Genre(s) to visualize', genres_list)
 
@@ -388,15 +383,8 @@ with st.sidebar:
                                         df_featurings['artist_2_name'].isin(selected_artists)]
             df_select = df_select.reset_index(drop=True)
             
-            labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
-            labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
-            labels_df['done_feat'] = (labels_df.num_feats >= 1)
-            
-            st.markdown(labels_df.head())
-            df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
-                                on=['artist_1', 'artist_2'],
-                                how='left'
-                            )
+            df_select = y_labels_val(spot_600, df_select)
+
 
     st.table(df_select.head())
 
