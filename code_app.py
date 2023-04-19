@@ -361,6 +361,7 @@ with st.sidebar:
 if st.button('Display the predictions'):
     st.table(df_select.head())
     print('bjr')
+    st.markdown('wé man')
     test_data = test_Data_construction(df_select, node_features)
     model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
     # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt',  map_location='cpu')
