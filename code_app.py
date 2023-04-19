@@ -233,8 +233,7 @@ def test_Data_construction(df_select, node_features):
     edge_index=edge_list, 
     edge_attr=edge_attr,
     y=y)
-
-    st.markdown(y)
+    
     return test_data
 
 
@@ -313,6 +312,7 @@ def y_labels_val(spot_600, df_select):
     st.markdown(sum(df_select.done_feat))
     st.table(df_select.head())
     return df_select
+
 
 mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model = full_initialisation()
 
