@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import itertools
 from torch_geometric.utils import negative_sampling
-
+import torch
 
 
 ###################
@@ -54,8 +54,49 @@ def nodes_featuring(df_song, DATA_PATH, read=True, path='edge_list_600k.pkl'):
 def read_spotify_600(DATA_PATH, read=True,
                      spotify_path='tracks_600k.csv',
                      artists_path='artists_600k.csv',
-                     pkl_spotify_path='tracks_600k_processed.pkl',
-                     pkl_artists_path='artists_600k_processed.pkl',
+                     pkl_spotify_path='tracks_600k_processed_2.pkl',
+                     pkl_artists_path='artists_600k_processed_2.pkl',
+                     ):
+    """
+    :param DATA_PATH: where to find or save data
+    :param spotify_path: original csv file with tracks
+    :param artists_path: original csv file with artists
+    :param pkl_spotify_path: saved pickle for tracks
+    :param pkl_artists_path: saved pickle for artists
+
+    :return: processed spotify and artists dataframes
+    """
+
+    if read:
+        spotify_600 = pd.read_pickle(DATA_PATH + pkl_spotify_path)
+        artists_600 = pd.read_pickle(DATA_PATH + pkl_artists_path)
+
+    else:
+        spotify_600 = pd.read_csv(DATA_PATH + spotify_path)
+        artists_600 = pd.read_csv(DATA_PATH + artists_path)
+
+        spotify_600 = spotify_600.rename(columns={'id': 'track_id', 'popularity': 'track_popularity'})
+
+        spotify_600['artists'] = spotify_600.artists.apply(lambda x: eval(x))
+        spotify_600['id_artists'] = spotify_600.id_artists.apply(lambda x: eval(x))
+        spotify_600['artist_id'] = spotify_600.id_artists.apply(lambda x: x[0])
+        spotify_600['num_artists'] = spotify_600.artists.apply(lambda x: len(x))
+        spotify_600['release_date'] = pd.to_datetime(spotify_600.release_date)
+
+        artists_600 = artists_600.rename(columns={'id': 'artist_id', 'popularity': 'artist_popularity'})
+        artists_600['genres'] = artists_600.genres.apply(lambda x: eval(x))
+
+        spotify_600.to_pickle(DATA_PATH + pkl_spotify_path)
+        artists_600.to_pickle(DATA_PATH + pkl_artists_path)
+
+    return spotify_600, artists_600
+
+
+def read_spotify_600_for_brouillon(DATA_PATH, read=True,
+                     spotify_path='tracks_600k.csv',
+                     artists_path='artists_600k.csv',
+                     pkl_spotify_path='tracks_600k_processed_brouillon.pkl',
+                     pkl_artists_path='artists_600k_processed_brouillon.pkl',
                      ):
     """
     :param DATA_PATH: where to find or save data

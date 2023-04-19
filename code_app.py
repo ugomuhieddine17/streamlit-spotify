@@ -1,6 +1,3 @@
-##### 
-## Graph data
-####
 #####################################################
 ################## PACKAGES #########################
 #####################################################
@@ -237,7 +234,7 @@ def test_Data_construction(df_select, node_features):
     edge_attr=edge_attr,
     y=y)
 
-    print(test_data)
+    st.markdown(y)
     return test_data
 
 
@@ -401,9 +398,6 @@ with st.sidebar:
 
 # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
 if st.button('Display the predictions'):
-    st.table(spot_600.head())
-    print('bjr')
-    st.markdown('wé man')
     test_data = test_Data_construction(df_select, node_features)
     test_pred = model(test_data.x, test_data.y_indices)
     proba_featuring = test_pred[:,1].tolist()
@@ -478,12 +472,10 @@ if st.button('Display the predictions'):
 
 if st.button('Display validation set'):
     val_data = test_Data_construction(df_select, node_features)
-    val_data.y_indices, val_data.y = neg_sampling(val_data)
-    test_pred = model(test_data.x, test_data.y_indices)
+    # val_data.y_indices, val_data.y = neg_sampling(val_data)
     val_proba = model(val_data.x, val_data.y_indices)
     val_pred = torch.argmax(val_proba, dim=1)
     val_data['prediction'] = val_pred
-    st.table(df_select.head())
 
     visualize_val_prediction(val_data, int_to_name, graph_name='val_graph')
 
