@@ -145,10 +145,9 @@ def full_initialisation():
     #####
     ## PARAMETERS
     #####
-    start_date = datetime.strptime("1998-01-01 00:00:01", "%Y-%m-%d %H:%M:%S")
+    start_date = datetime.strptime("2008-01-01 00:00:01", "%Y-%m-%d %H:%M:%S")
     end_date = datetime.strptime("2020-12-31 23:59:00", "%Y-%m-%d %H:%M:%S")
     n_month = 12
-    interval = timedelta(days=365.25*n_month/12)
 
     # one to one spotify database rearrangement
     start_date_spotify_600 = spotify_600[spotify_600.release_date.dt.year >= start_date.year].copy()
@@ -161,6 +160,8 @@ def full_initialisation():
     # existing artists 
     in_spot_artists_600 = artists_600[artists_600.artist_id.isin(start_date_spotify_600.id_artists.explode().unique())].copy()
 
+    print(f'len of spot_600 : {len(spot_600)}')
+    
 
     ######################################################
     ## BUILD FEATURES OF ARTIST CONSIDERING START DATE ###
@@ -340,7 +341,7 @@ mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings
 
 # Set header title
 st.title('Network Graph Visualization of artist interactions')
-
+st.markdown(f'len of in_spot_artists_600 : {len(in_spot_artists_600)}')
 # Define list of selection options and sort alphabetically
 artist_list = artist_features.name.unique()
 
