@@ -359,7 +359,7 @@ with st.sidebar:
 
 # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
 if st.button('Display the predictions'):
-    st.table(df_featurings.head())
+    st.table(spot_600.head())
     print('bjr')
     st.markdown('wé man')
     test_data = test_Data_construction(df_select, node_features)
