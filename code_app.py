@@ -437,11 +437,13 @@ if st.button('Display the predictions'):
 
         artist_net.add_node(src, src, title=src, font_size=60)
         artist_net.add_node(dst, dst, title=dst, font='60px arial black')
-        if proba < 0.5:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#f4cccc", width=round(proba**2*15)+1)
-        else:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#05BFDB", width=round(proba**2*15)+1)
+        if proba < 0.7 and  proba >= 0.45:
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#F7D060", width=round(proba**2*15)+1)
+        elif proba < 0.45:
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#FF6D60", width=round(proba**2*15)+1)
 
+        elif proba >= 0.7:
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#98D8AA", width=round(proba**2*15)+1)
 
 
     artist_net.repulsion(node_distance=420, central_gravity=0.33,
@@ -478,6 +480,8 @@ if st.button('Display validation set'):
     val_data['prediction'] = val_pred
 
     visualize_val_prediction(val_data, int_to_name, graph_name='val_graph')
+
+
 
 
 if st.button('Display the original graph'):
