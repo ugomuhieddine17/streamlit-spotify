@@ -159,8 +159,7 @@ def full_initialisation():
 
     # existing artists 
     in_spot_artists_600 = artists_600[artists_600.artist_id.isin(start_date_spotify_600.id_artists.explode().unique())].copy()
-
-    print(f'len of spot_600 : {len(spot_600)}')
+    in_spot_artists_600 = in_spot_artists_600.sort_values(by='name')
     
 
     ######################################################
@@ -225,6 +224,8 @@ def artist_features_evolving(in_spot_artists_600, start_date_spotify_600, end_da
                                           DATA_PATH, read=False
                               ).reset_index()
     artist_features['int_artist_id'] = artist_features['artist_id'].map(mapping)
+    artist_features = artist_features.sort_values(by='int_artist_id')
+    
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
