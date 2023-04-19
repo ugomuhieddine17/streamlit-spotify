@@ -16,7 +16,7 @@ import seaborn as sns
 import networkx as ntx
 import csv
 import random
-
+from sklearn.metrics import accuracy_score
 from datetime import datetime, timedelta, date
 import pandas as pd
 from itertools import combinations
@@ -257,12 +257,12 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
     got_net = Network(height='1000px', width='100%',bgcolor='#222222', font_color='white',
     notebook = False, directed=False)
 
-
+    print('bite')
     sources = val_data.y_indices[0,:].tolist()
     targets = val_data.y_indices[1,:].tolist()
     prediction = val_data.prediction.tolist()
     true_label = val_data.y.tolist()
-
+    st.markdown(f'### The accuracy \n the accuracy is {round(accuracy_score(prediction, true_label)*100, 2)} %')
     sources = [int_to_name[x] for x in sources]
     targets = [int_to_name[x] for x in targets]
 
@@ -278,16 +278,16 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
         got_net.add_node(dst, dst, title=dst)
     
         if pred+label == 2:
-            got_net.add_edge(src, dst, title="TP", color="#38761d", width=7)
+            got_net.add_edge(src, dst, title="TP", color="#38761d", width=4)
 
         if pred+label == 0:
-            got_net.add_edge(src, dst, title="TN", color="#b6d7a8", width=7)
+            got_net.add_edge(src, dst, title="TN", color="#b6d7a8", width=4)
             pass
         elif pred == 0 and label == 1:
-            got_net.add_edge(src, dst, title="FN", color="#f44336", width=7)
+            got_net.add_edge(src, dst, title="FN", color="#f44336", width=4)
 
         elif pred == 1 and label == 0:
-            got_net.add_edge(src, dst, title="FP", color="#f4cccc", width=7)
+            got_net.add_edge(src, dst, title="FP", color="#f4cccc", width=4)
 
     try:
         path = '/tmp'
