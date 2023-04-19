@@ -301,9 +301,10 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
 def y_labels_val(spot_600, df_select):
     labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
     st.markdown('labels_df')
-    st.table(labels_df.head())
+    
     labels_df = labels_df.groupby(['artist_1_name', 'artist_2_name']).agg(num_feats=('track_id', 'count')).reset_index()
     labels_df['done_feat'] = (labels_df.num_feats >= 1)
+    st.table(labels_df.head())
     df_select = pd.merge(df_select, labels_df[['artist_1_name', 'artist_2_name', 'done_feat']],
                         on=['artist_1_name', 'artist_2_name'],
                         how='left'
