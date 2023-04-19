@@ -240,8 +240,8 @@ def test_Data_construction(df_select, node_features):
 
 def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
 
-    got_net = Network(height='800px', width='100%', bgcolor='#ffffff', # Changed height@
-                font_color='black',notebook = False, directed=False)#select_menu=True)
+    got_net = Network(height='1000px', width='100%',bgcolor='#222222', font_color='white',
+    notebook = False, directed=False)
 
 
     sources = val_data.y_indices[0,:].tolist()
