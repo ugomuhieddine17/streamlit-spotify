@@ -19,7 +19,8 @@ import seaborn as sns
 import networkx as ntx
 import csv
 import random
-from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta, date
 import pandas as pd
 from itertools import combinations
 from numpy.linalg import norm
@@ -362,11 +363,11 @@ with st.sidebar:
 
     begin_date = st.date_input(
     "Begin date for validation",
-    datetime.date(2010, 1, 1))
+    date(2010, 1, 1))
     
     end_date = st.date_input(
     "End date for validation",
-    datetime.date(2011, 1, 1))
+    date(2011, 1, 1))
 
     try: 
         labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
