@@ -6,6 +6,8 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import itertools
+from torch_geometric.utils import negative_sampling
+
 
 
 ###################
@@ -203,3 +205,15 @@ def draw_graph(G, with_labels=False, node_size=20, fig_size=(15, 15)):
     """
     fig, ax = plt.subplots(figsize=fig_size)
     ntx.draw_networkx(G, with_labels=with_labels, node_size=node_size, ax=ax)
+
+
+def neg_sampling(snapshot):
+    # print(snapshot)
+    neg_edge_index = negative_sampling(
+                edge_index=snapshot.y_indices.long(), num_nodes=snapshot.num_nodes,
+                num_neg_samples=snapshot.y.size(0),force_undirected=True)
+
+    y_indices = torch.cat(
+    [snapshot.y_indices.long(), neg_edge_index],
+    dim=-1,
+    )

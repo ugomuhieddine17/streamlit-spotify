@@ -211,7 +211,9 @@ def full_initialisation():
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
-    return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
+
+    return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model
 
 
 def test_Data_construction(df_select, node_features):
@@ -227,16 +229,18 @@ def test_Data_construction(df_select, node_features):
     
     edge_list = torch.from_numpy(np.array(df_select[['artist_1','artist_2']].values).transpose())
     edge_attr = torch.from_numpy(np.array(df_select.num_feats.values).transpose())
+    y = torch.from_numpy(np.array(df_select.done_feat.values).transpose())
     test_data = Data(x=torch.from_numpy(node_features).float(), 
     y_indices=edge_list.long(), 
     edge_index=edge_list, 
-    edge_attr=edge_attr)
+    edge_attr=edge_attr,
+    y=y)
 
     print(test_data)
     return test_data
 
 
-def visualize_prediction(val_data, int_to_name, graph_name='val_graph'):
+def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
 
     got_net = Network(height='800px', width='100%', bgcolor='#ffffff', # Changed height@
                 font_color='black',notebook = False, directed=False)#select_menu=True)
@@ -294,7 +298,8 @@ def visualize_prediction(val_data, int_to_name, graph_name='val_graph'):
 
 
 
-mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features = full_initialisation()
+mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model = full_initialisation()
+
 
 ######################################################
 ######################################################
@@ -354,6 +359,26 @@ with st.sidebar:
                                         df_featurings['artist_2_name'].isin(selected_artists)]
             df_select = df_select.reset_index(drop=True)
 
+
+    begin_date = st.date_input(
+    "Begin date for validation",
+    datetime.date(2010, 1, 1))
+    
+    end_date = st.date_input(
+    "End date for validation",
+    datetime.date(2011, 1, 1))
+
+    try: 
+        labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
+        labels_df = labels_df.groupby(['artist_1', 'artist_2']).agg(num_feats=('track_id', 'count')).reset_index()
+        labels_df['done_feat'] = (labels_df.num_feats >= 1).int()
+        st.markdown(labels_df.head())
+        df_select = pd.merge(df_select, labels_df[['artist_1', 'artist_2', 'done_feat']],
+                            on=['artist_1', 'artist_2'],
+                            how='left'
+                            )
+    except:
+        st.markdown('select something bitch')
 #plot the most probable featurings
 # 
 
@@ -363,8 +388,6 @@ if st.button('Display the predictions'):
     print('bjr')
     st.markdown('wé man')
     test_data = test_Data_construction(df_select, node_features)
-    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
-    # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt',  map_location='cpu')
     test_pred = model(test_data.x, test_data.y_indices)
     proba_featuring = test_pred[:,1].tolist()
     proba_featuring = [round(prob,3) for prob in proba_featuring]
@@ -436,10 +459,20 @@ if st.button('Display the predictions'):
     st.table(edge_df.sort_values(by='probability', ascending=True)[:30])
 
 
+if st.button('Display validation set'):
+    val_data = test_Data_construction(df_select, node_features)
+    val_data.y_indices, val_data.y = neg_sampling(val_data)
+    test_pred = model(test_data.x, test_data.y_indices)
+    val_proba = model(val_data.x, val_data.y_indices)
+    val_pred = torch.argmax(val_proba, dim=1)
+    val_data['prediction'] = val_pred
+    st.table(df_select.head())
 
+    visualize_val_prediction(val_data, int_to_name, graph_name='val_graph')
 
 
 if st.button('Display the original graph'):
+
     G = nx.from_pandas_edgelist(df_select, 'artist_1_name', 'artist_2_name', 'num_feats')
     # Initiate PyVis network object
     print(G)
