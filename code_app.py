@@ -224,6 +224,7 @@ def test_Data_construction(df_select, node_features):
     Returns:
         pytorch geometric Data: the test Data object
     """
+    st.table(df_select.head(30))
     edge_list = torch.from_numpy(np.array(df_select[['artist_1','artist_2']].values).transpose())
     edge_attr = torch.from_numpy(np.array(df_select.num_feats.values).transpose())
     test_data = Data(x=torch.from_numpy(node_features).float(), 
@@ -235,50 +236,61 @@ def test_Data_construction(df_select, node_features):
     return test_data
 
 
-def visualize_prediction(val_data, graph_plot_name, reversed_mapping, DATA_PATH=DATA_PATH):
+def visualize_prediction(val_data, int_to_name, graph_name='val_graph'):
 
     got_net = Network(height='800px', width='100%', bgcolor='#ffffff', # Changed height@
                 font_color='black',notebook = False, directed=False)#select_menu=True)
 
 
-    sources = val_data.edge_index[0,:].tolist()
-    targets = val_data.edge_index[1,:].tolist()
-    print([reversed_mapping[s] for s in sources])
+    sources = val_data.y_indices[0,:].tolist()
+    targets = val_data.y_indices[1,:].tolist()
     prediction = val_data.prediction.tolist()
     true_label = val_data.y.tolist()
+
+    sources = [int_to_name[x] for x in sources]
+    targets = [int_to_name[x] for x in targets]
+
     # true_label = 
     edge_data = zip(sources, targets, prediction, true_label) 
 
-    max_to_plot = len(sources)
-    i = 0 
     for e in edge_data:
-        if i < max_to_plot:
-          src = str(e[0])
-          dst = str(e[1])
-          pred = e[2]
-          label = e[3]
-          got_net.add_node(src, src, title=src)
-          got_net.add_node(dst, dst, title=dst)
-      
-          if pred+label == 2:
-              got_net.add_edge(src, dst, title="TP", color="#38761d", width=7)
+        src = str(e[0])
+        dst = str(e[1])
+        pred = e[2]
+        label = e[3]
+        got_net.add_node(src, src, title=src)
+        got_net.add_node(dst, dst, title=dst)
+    
+        if pred+label == 2:
+            got_net.add_edge(src, dst, title="TP", color="#38761d", width=7)
 
-          if pred+label == 0:
-              got_net.add_edge(src, dst, title="TN", color="#b6d7a8", width=7)
-              pass
-          elif pred == 0 and label == 1:
-              got_net.add_edge(src, dst, title="FN", color="#f44336", width=7)
+        if pred+label == 0:
+            got_net.add_edge(src, dst, title="TN", color="#b6d7a8", width=7)
+            pass
+        elif pred == 0 and label == 1:
+            got_net.add_edge(src, dst, title="FN", color="#f44336", width=7)
 
-          elif pred == 1 and label == 0:
-              got_net.add_edge(src, dst, title="FP", color="#f4cccc", width=7)
-          i += 1
-        else:
-          break
+        elif pred == 1 and label == 0:
+            got_net.add_edge(src, dst, title="FP", color="#f4cccc", width=7)
 
-    neighbor_map = got_net.get_adj_list()
+    try:
+        path = '/tmp'
+        got_net.save_graph(f'{path}/{graph_name}.html')
+        HtmlFile = open(f'{path}/{graph_name}.html', 'r', encoding='utf-8')
+        print('tmp')
 
-    print(got_net)
-    got_net.show(DATA_PATH+f"{graph_plot_name}.html", notebook=False)
+    # Save and read graph as HTML file (locally)
+    except:
+        path = './html_files'
+        got_net.save_graph(f'{path}/{graph_name}.html')
+        HtmlFile = open(f'{path}/{graph_name}.html', 'r', encoding='utf-8')
+
+    # print(artist_net)
+    # Load HTML file in HTML component for display on Streamlit page
+    # print(HtmlFile)
+    raw_html = HtmlFile.read().encode("utf-8")
+    raw_html = base64.b64encode(raw_html).decode()
+    components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
 
 
 
@@ -348,9 +360,7 @@ with st.sidebar:
 # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
 if st.button('Display the predictions'):
     test_data = test_Data_construction(df_select, node_features)
-    st.markdown('coucou')
     model = torch.load(DATA_PATH + 'best-model_GAT_MLP_TRAINED_normalized_working.pt',  map_location='cpu')
-    print(model)
     # model = torch.load(DATA_PATH + 'best-model_GAT_MLP_PYVIS.pt',  map_location='cpu')
     test_pred = model(test_data.x, test_data.y_indices)
     proba_featuring = test_pred[:,1].tolist()
