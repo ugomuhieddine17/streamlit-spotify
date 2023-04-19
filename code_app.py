@@ -340,11 +340,11 @@ with st.sidebar:
 
     begin_date = st.date_input(
     "Begin date for validation",
-    date(2010, 1, 1))
+    date(2019, 1, 1))
     
     end_date = st.date_input(
     "End date for validation",
-    date(2011, 1, 1))
+    date(2020, 1, 1))
 
     begin_date = np.datetime64(begin_date)
     end_date = np.datetime64(end_date)
