@@ -232,6 +232,14 @@ def artist_features_evolving(in_spot_artists_600, start_date_spotify_600, end_da
     return node_features
 
 
+def extract_dynamic_edges(s):
+    # Extract dynamic edges and their features
+    featuring_indices = s[["artist_1", "artist_2"]].values
+    #
+    num_featurings = np.ones_like(s.track_id.values)
+
+    return num_featurings.transpose(), featuring_indices.transpose()
+
     
 def test_Data_construction(df_select, node_features):
     """build the data test obect
@@ -370,46 +378,50 @@ with st.sidebar:
 
     node_features_val = artist_features_evolving(in_spot_artists_600, start_date_spotify_600, end_date, mapping)
 
-if graph_type != 'Genres':
-    # Implement multiselect dropdown menu for option selection (returns a list)
-    selected_artists = st.multiselect('Select artist(s) to visualize', artist_list)
+    if graph_type != 'Genres':
+        # Implement multiselect dropdown menu for option selection (returns a list)
+        selected_artists = st.multiselect('Select artist(s) to visualize', artist_list)
 
-    # Set info message on initial site load
-    if len(selected_artists) == 0:
-        st.text('Choose at least 1 artist to get started')
+        # Set info message on initial site load
+        if len(selected_artists) == 0:
+            st.text('Choose at least 1 artist to get started')
 
-    else:
-        if  graph_type == 'Direct connections':
+        else:
+            if  graph_type == 'Direct connections':
+                df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
+                                            df_featurings['artist_2_name'].isin(selected_artists)]
+                df_select = df_select.reset_index(drop=True)
+                df_select = y_labels_val(spot_600, df_select)
+                
+            else:
+                df_pre_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
+                                            df_featurings['artist_2_name'].isin(selected_artists)]
+                df_pre_select = df_pre_select.reset_index(drop=True)
+
+                propagated_list = list(set(list(df_pre_select.artist_1_name.unique()) + list(df_pre_select.artist_2_name.unique())))
+
+                df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(propagated_list) | \
+                                            df_featurings['artist_2_name'].isin(propagated_list)]
+                df_select = y_labels_val(spot_600, df_select)
+                
+    elif graph_type == 'Genres':
+        selected_genres = st.multiselect('Select Genre(s) to visualize', genres_list)
+
+        if len(selected_genres) == 0:
+            st.text('Choose at least 1 genre to get started')
+
+        else:
+            df_pre_select = artist_features.explode('genres')
+            selected_artists = df_pre_select[df_pre_select.genres.isin(selected_genres)].name.unique()
             df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
                                         df_featurings['artist_2_name'].isin(selected_artists)]
             df_select = df_select.reset_index(drop=True)
-            df_select = y_labels_val(spot_600, df_select)
             
-        else:
-            df_pre_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
-                                        df_featurings['artist_2_name'].isin(selected_artists)]
-            df_pre_select = df_pre_select.reset_index(drop=True)
-
-            propagated_list = list(set(list(df_pre_select.artist_1_name.unique()) + list(df_pre_select.artist_2_name.unique())))
-
-            df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(propagated_list) | \
-                                        df_featurings['artist_2_name'].isin(propagated_list)]
             df_select = y_labels_val(spot_600, df_select)
-            
-elif graph_type == 'Genres':
-    selected_genres = st.multiselect('Select Genre(s) to visualize', genres_list)
 
-    if len(selected_genres) == 0:
-        st.text('Choose at least 1 genre to get started')
 
-    else:
-        df_pre_select = artist_features.explode('genres')
-        selected_artists = df_pre_select[df_pre_select.genres.isin(selected_genres)].name.unique()
-        df_select = df_featurings.loc[df_featurings['artist_1_name'].isin(selected_artists) | \
-                                    df_featurings['artist_2_name'].isin(selected_artists)]
-        df_select = df_select.reset_index(drop=True)
-        
-        df_select = y_labels_val(spot_600, df_select)
+    st.table(df_select.head())
+    st.markdown('Hello guys')
 
 #plot the most probable featurings
 # 
