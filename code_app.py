@@ -486,13 +486,15 @@ if len(selected_artists) != 0:
         Followers: {the_row.followers.values[0]}  \n  \
         Genres: {the_row.genres.values[0]}')
 
+        
+
+    with col2:
         indic = st.selectbox(
             "What else information would you like to see?",
             list(dico_agg.keys()),
             index=0
         )
 
-    with col2:
         chart = plot_general_info(start_date_spotify_600, selected_artists, indic)
         st.altair_chart(chart, use_container_width=True)
 
@@ -501,6 +503,7 @@ if len(selected_artists) != 0:
     # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
     st.markdown('# What will be his/her next collaborations?')
     
+st.markdown('# What will be his/her next collaborations?')
 if st.button('Display the predictions'):
     test_data = test_Data_construction(df_select, node_features)
     test_pred = model(test_data.x, test_data.y_indices)
