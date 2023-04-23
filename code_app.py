@@ -498,8 +498,9 @@ if len(selected_artists) != 0:
 
     
 
-# choice = st.number_input("Pick the number of most probable featurings", 0, 50)
-st.markdown('# What will be his/her next collaborations?')
+    # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
+    st.markdown('# What will be his/her next collaborations?')
+    
 if st.button('Display the predictions'):
     test_data = test_Data_construction(df_select, node_features)
     test_pred = model(test_data.x, test_data.y_indices)
