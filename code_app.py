@@ -471,21 +471,27 @@ if len(selected_artists) != 0:
 
 
     #streamlit drawings
-    st.markdown(f' # {selected_artists[0]}, general information \n  \
+    st.markdown(f'# {selected_artists[0]}, general information \n  \
     {artist_features.columns}')
 
     col1, col2 = st.columns(2)
 
     with col1:
+        
+        the_row = artist_features[artist_features.name == selected_artists[0]]
+        st.markdown(f'### Popularity \n \
+        predicted: In process \n  \
+        True: {the_row.artist_popularity.values[0]}')
+        
+        st.markdown(f'### Genres and followers \n \
+        Followers: {the_row.followers.values[0]}  \n  \
+        Genres: {the_row.genres.values[0]}')
+
         indic = st.selectbox(
-            "What information would you like to see?",
+            "What else information would you like to see?",
             list(dico_agg.keys()),
             index=0
         )
-
-        st.markdown(f'## Popularity \n \
-        predicted: In process \n  \
-        True: {artist_features[artist_features.name == selected_artists[0]].popularity.values[0]}')
 
     with col2:
         chart = plot_general_info(start_date_spotify_600, selected_artists, indic)
