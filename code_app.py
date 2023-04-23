@@ -58,10 +58,14 @@ PATH_TEST = DATA_PATH+"test.txt"
 
 
 
+import torch
+from torch.nn import Linear
+import torch.nn.functional as F
+
 class MLP_post(nn.Module):
     def __init__(self, in_channels, hidden_channels, out_channels, num_layers):
         super().__init__()
-        torch.manual_seed(12345)
+        # torch.manual_seed(12345)
         self.num_layers = num_layers
         self.lin1 = Linear(in_channels, hidden_channels)
         self.list_FC = nn.ModuleList()
@@ -126,11 +130,13 @@ class GAT_MLP(torch.nn.Module):
 
           # Concatenate the features along the last dimension
           x = torch.cat([src_features, tgt_features], dim=-1)
+          # print(edge_attr.size())
           # print('concatenated', x.size())
           x = self.MLP_post.forward(x)
           # print('final', x)
         #   print('x',x)
           return x
+
 
 @st.cache_data
 def full_initialisation():
@@ -212,7 +218,7 @@ def full_initialisation():
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
-    model = torch.load(DATA_PATH + 'best-model_very_good_92accu.pt',  map_location='cpu')
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_final_neg_samp_all_nodes.pt',  map_location='cpu')
 
     return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600
 
