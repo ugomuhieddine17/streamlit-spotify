@@ -218,7 +218,7 @@ def full_initialisation():
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
-    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_final_neg_samp_all_nodes.pt',  map_location='cpu')
+    model = torch.load(DATA_PATH + 'best-model_very_good_92accu.pt',  map_location='cpu')
 
     return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600
 
@@ -471,7 +471,8 @@ if len(selected_artists) != 0:
 
 
     #streamlit drawings
-    st.markdown(f' #{selected_artists[0]}, general information \n ')
+    st.markdown(f' # {selected_artists[0]}, general information \n  \
+    {artist_features.columns}')
 
     col1, col2 = st.columns(2)
 
@@ -481,6 +482,10 @@ if len(selected_artists) != 0:
             list(dico_agg.keys()),
             index=0
         )
+
+        st.markdown(f'## Popularity \n \
+        predicted: In process \n  \
+        True: {artist_features[artist_features.name == selected_artists[0]].popularity.values[0]}')
 
     with col2:
         chart = plot_general_info(start_date_spotify_600, selected_artists, indic)
