@@ -471,8 +471,7 @@ if len(selected_artists) != 0:
 
 
     #streamlit drawings
-    st.markdown(f'# {selected_artists[0]}, general information \n  \
-    {artist_features.columns}')
+    st.markdown(f'# {selected_artists[0]}, general information \n ')
 
     col1, col2 = st.columns(2)
 
