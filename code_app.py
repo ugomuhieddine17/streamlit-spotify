@@ -31,6 +31,8 @@ import torch.nn as nn
 import torch
 from torch.nn import Linear
 import torch.nn.functional as F
+import altair as alt
+from altair import expr, datum
 
 
 local = True
@@ -145,7 +147,7 @@ def full_initialisation():
     #####
     ## PARAMETERS
     #####
-    start_date = datetime.strptime("2008-01-01 00:00:01", "%Y-%m-%d %H:%M:%S")
+    start_date = datetime.strptime("1999-01-01 00:00:01", "%Y-%m-%d %H:%M:%S")
     end_date = datetime.strptime("2020-12-31 23:59:00", "%Y-%m-%d %H:%M:%S")
     n_month = 12
 
@@ -210,7 +212,7 @@ def full_initialisation():
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
-    model = torch.load(DATA_PATH + 'best-model_very_good_92accu.pt',  map_location='cpu')
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_final_neg_samp_all_nodes.pt',  map_location='cpu')
 
     return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600
 
@@ -315,23 +317,56 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
 
 def y_labels_val(spot_600, df_select):
     labels_df = spot_600[(spot_600.release_date >= begin_date) & (spot_600.release_date <= end_date)].copy()
-    st.markdown('labels_df')
     
     labels_df = labels_df.groupby(['artist_1_name', 'artist_2_name']).agg(num_feats=('track_id', 'count')).reset_index()
     labels_df['done_feat'] = labels_df.num_feats.apply(lambda x: 1 if x >= 1 else 0)
-    st.markdown(sum(labels_df.done_feat))
-    st.table(labels_df.head())
     df_select = pd.merge(df_select, labels_df[['artist_1_name', 'artist_2_name', 'done_feat']],
                         on=['artist_1_name', 'artist_2_name'],
                         how='left'
                     )
     df_select.done_feat = df_select.done_feat.fillna(0)
 
-    st.markdown('merged selected')
-    st.markdown(sum(df_select.done_feat))
-    st.table(df_select.head())
     return df_select
 
+def plot_general_info(start_date_spotify_600, selected_artists, indic):
+    start_date_spotify_600['year'] = start_date_spotify_600.release_date.dt.year
+    id_to_name = {a:b for (a,b) in artist_features[['artist_id', 'name']].values}
+    start_date_spotify_600['artist_name'] = start_date_spotify_600.artist_id.map(id_to_name)
+    to_means = ['track_popularity', 'duration_ms', 'explicit',
+            'danceability', 'energy',
+        'key', 'loudness', 'speechiness', 'acousticness',
+        'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature', 'Number of artists involved']
+    dico_agg = {a:'mean' for a in to_means}
+    dico_agg['number of tracks'] = 'count'
+
+    start_date_spotify_600 = start_date_spotify_600.rename(columns={'track_id':'number of tracks', 'num_artists':'Number of artists involved'})
+    
+    useful_one = start_date_spotify_600[start_date_spotify_600.artist_name == selected_artists[0]].copy()
+    agg_useful = useful_one.groupby('year').agg(dico_agg).reset_index()
+
+    chart = alt.Chart(agg_useful).mark_point().encode(
+        x='year:O',
+        y=alt.Y(f'{indic}:Q', scale=alt.Scale(domain=[agg_useful[indic].min()*0.8, agg_useful[indic].max()*1.1])),
+        tooltip=[
+            alt.Tooltip('Year:O', title='Year'),
+            alt.Tooltip(f'number of tracks:Q'),
+        ]
+        ).properties(
+                width=500,
+                height=300
+                )
+    chart += alt.Chart(agg_useful).mark_line().encode(
+        x='year:O',
+        y=alt.Y(f'{indic}:Q', scale=alt.Scale(domain=[agg_useful[indic].min()*0.8, agg_useful[indic].max()*1.1])),
+        tooltip=[
+            alt.Tooltip('Year:O', title='Year'),
+            alt.Tooltip(f'number of tracks:Q'),
+        ]
+        ).properties(
+                width=500,
+                height=300
+                ).interactive()
+    return chart
 
 mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600 = full_initialisation()
 
@@ -343,8 +378,7 @@ mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings
 ######################################################
 
 # Set header title
-st.title('Network Graph Visualization of artist interactions')
-st.markdown(f'len of in_spot_artists_600 : {len(in_spot_artists_600)}')
+st.title('The future of Music')
 # Define list of selection options and sort alphabetically
 artist_list = artist_features.name.unique()
 
@@ -402,6 +436,8 @@ elif graph_type == 'Genres':
     if len(selected_genres) == 0:
         st.text('Choose at least 1 genre to get started')
 
+
+
     else:
         df_pre_select = artist_features.explode('genres')
         selected_artists = df_pre_select[df_pre_select.genres.isin(selected_genres)].name.unique()
@@ -411,8 +447,40 @@ elif graph_type == 'Genres':
         
         df_select = y_labels_val(spot_600, df_select)
 
-#plot the most probable featurings
-# 
+
+####################
+## GENERAL INFO ####
+####################
+
+
+if len(selected_artists) != 0:
+    
+    #dico vals
+    to_means = ['track_popularity', 'duration_ms', 'explicit',
+            'danceability', 'energy',
+        'key', 'loudness', 'speechiness', 'acousticness',
+        'instrumentalness', 'liveness', 'valence', 'tempo', 'time_signature', 'Number of artists involved']
+    dico_agg = {a:'mean' for a in to_means}
+    dico_agg['number of tracks'] = 'count'
+
+
+    #streamlit drawings
+    st.markdown(f' #{selected_artists[0]}, general information \n ')
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        indic = st.selectbox(
+            "What information would you like to see?",
+            list(dico_agg.keys()),
+            index=0
+        )
+
+    with col2:
+        chart = plot_general_info(start_date_spotify_600, selected_artists, indic)
+        st.altair_chart(chart, use_container_width=True)
+
+    
 
 # choice = st.number_input("Pick the number of most probable featurings", 0, 50)
 if st.button('Display the predictions'):
@@ -456,12 +524,12 @@ if st.button('Display the predictions'):
         artist_net.add_node(src, src, title=src, font_size=60)
         artist_net.add_node(dst, dst, title=dst, font='60px arial black')
         if proba < 0.7 and  proba >= 0.45:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#F7D060", width=round(proba**2*15)+1)
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#F7D060", width=round(proba**2*5)+1)
         elif proba < 0.45:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#FF6D60", width=round(proba**2*15)+1)
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#FF6D60", width=round(proba**2*5)+1)
 
         elif proba >= 0.7:
-            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#98D8AA", width=round(proba**2*15)+1)
+            artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#98D8AA", width=round(proba**2*5)+1)
 
 
     artist_net.repulsion(node_distance=420, central_gravity=0.33,
@@ -501,40 +569,3 @@ if st.button('Display validation set'):
         \n {val_data}')
 
     visualize_val_prediction(val_data, int_to_name, graph_name='val_graph')
-
-
-
-
-if st.button('Display the original graph'):
-
-    G = nx.from_pandas_edgelist(df_select, 'artist_1_name', 'artist_2_name', 'num_feats')
-    # Initiate PyVis network object
-    print(G)
-    artist_net = Network(height='500px', width='100%', bgcolor='#222222', font_color='white')
-    
-
-    # Take Networkx graph and translate it to a PyVis graph format
-    artist_net.from_nx(G)
-
-    # Generate network with specific layout settings
-    artist_net.repulsion(node_distance=420, central_gravity=0.33,
-                        spring_length=110, spring_strength=0.10,
-                        damping=0.95)
-    # Save and read graph as HTML file (on Streamlit Sharing)
-    # try:
-    #     path = '/tmp'
-    #     artist_net.save_graph(f'{path}/pyvis_graph.html')
-    #     HtmlFile = open(f'{path}/pyvis_graph.html', 'r', encoding='utf-8')
-
-
-    # # Save and read graph as HTML file (locally)
-    # except:
-    path = './html_files'
-    artist_net.save_graph(f'{path}/pyvis_graph_2.html')
-    HtmlFile = open(f'{path}/pyvis_graph_2.html', 'r', encoding='utf-8')
-
-    # Load HTML file in HTML component for display on Streamlit page
-    print(HtmlFile)
-    raw_html = HtmlFile.read().encode("utf-8")
-    raw_html = base64.b64encode(raw_html).decode()
-    components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
