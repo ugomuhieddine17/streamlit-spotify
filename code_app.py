@@ -225,12 +225,22 @@ def artist_features_evolving(in_spot_artists_600, start_date_spotify_600, end_da
                               ).reset_index()
     artist_features['int_artist_id'] = artist_features['artist_id'].map(mapping)
     artist_features = artist_features.sort_values(by='int_artist_id')
-    
+
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
     return node_features
 
+
+def extract_dynamic_edges(s):
+    # Extract dynamic edges and their features
+    featuring_indices = s[["artist_1", "artist_2"]].values
+    #
+    num_featurings = np.ones_like(s.track_id.values)
+
+    return num_featurings.transpose(), featuring_indices.transpose()
+
+    
 def test_Data_construction(df_select, node_features):
     """build the data test obect
 
@@ -411,6 +421,7 @@ with st.sidebar:
 
 
     st.table(df_select.head())
+    st.markdown('Hello guys')
 
 #plot the most probable featurings
 # 
