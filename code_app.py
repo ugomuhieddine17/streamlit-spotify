@@ -218,7 +218,7 @@ def full_initialisation():
     node_features = np.array(artist_features.drop(columns=['artist_id', 'genres', 'name', 'int_artist_id']).fillna(0))
     node_features = (node_features - node_features.mean(axis=0))/node_features.std(axis=0) 
 
-    model = torch.load(DATA_PATH + 'best-model_very_good_92accu.pt',  map_location='cpu')
+    model = torch.load(DATA_PATH + 'best-model_GAT_MLP_st_one_from_existing.pt',  map_location='cpu')
 
     return mapping, reversed_mapping, int_to_name, spot_600, artist_features, df_featurings, node_features, model, start_date_spotify_600, in_spot_artists_600
 
@@ -586,7 +586,6 @@ if st.button('Display validation set'):
     val_pred = torch.argmax(val_proba, dim=1)
     val_data['prediction'] = val_pred
     st.markdown(f'### The accuracy \n \
-     the accuracy is {round(accuracy_score(val_data.prediction.numpy(), val_data.y.numpy())*100, 2)} %. \
-        \n {val_data}')
+     the accuracy is {round(accuracy_score(val_data.prediction.numpy(), val_data.y.numpy())*100, 2)} %.')
 
     visualize_val_prediction(val_data, int_to_name, graph_name='val_graph')
