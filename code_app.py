@@ -289,16 +289,16 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
         got_net.add_node(dst, dst, title=dst)
     
         if pred+label == 2:
-            got_net.add_edge(src, dst, title="TP", color="#38761d", width=4)
+            got_net.add_edge(src, dst, title="TP", color="#00FFCA", width=4)
 
         if pred+label == 0:
-            got_net.add_edge(src, dst, title="TN", color="#b6d7a8", width=4)
+            got_net.add_edge(src, dst, title="TN", color="#19A7CE", width=4)
             pass
         elif pred == 0 and label == 1:
-            got_net.add_edge(src, dst, title="FN", color="#f44336", width=4)
+            got_net.add_edge(src, dst, title="FN", color="#645CBB", width=4)
 
         elif pred == 1 and label == 0:
-            got_net.add_edge(src, dst, title="FP", color="#f4cccc", width=4)
+            got_net.add_edge(src, dst, title="FP", color="#9384D1", width=4)
 
     try:
         path = '/tmp'
