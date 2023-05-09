@@ -269,7 +269,6 @@ def visualize_val_prediction(val_data, int_to_name, graph_name='val_graph'):
     got_net = Network(height='1000px', width='100%',bgcolor='#222222', font_color='white',
     notebook = False, directed=False)
 
-    print('bite')
     sources = val_data.y_indices[0,:].tolist()
     targets = val_data.y_indices[1,:].tolist()
     prediction = val_data.prediction.tolist()
@@ -583,8 +582,10 @@ if st.button('Display validation set'):
     val_data = test_Data_construction(df_select, node_features_val)
     # val_data.y_indices, val_data.y = neg_sampling(val_data)
     val_proba = model(val_data.x, val_data.y_indices)
-    val_pred = torch.argmax(val_proba, dim=1)
+    # val_pred = torch.argmax(val_proba, dim=1)
+    val_pred = (val_proba[:,1] >= 0.99999).int()
     val_data['prediction'] = val_pred
+    # I am sure
     st.markdown(f'### The accuracy \n \
      the accuracy is {round(accuracy_score(val_data.prediction.numpy(), val_data.y.numpy())*100, 2)} %.')
 
