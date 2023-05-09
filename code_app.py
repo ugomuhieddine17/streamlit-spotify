@@ -544,13 +544,13 @@ if st.button('Display the predictions'):
         artist_net.add_node(src, src, title=src, font_size=60)
         artist_net.add_node(dst, dst, title=dst, font='60px arial black')
         
-        if proba < 0.9999 and  proba >= 0.45:
+        if proba < 0.999 and  proba >= 0.45:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#F7D060", width=4)
         
         elif proba < 0.45:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#FF6D60", width=2)
         
-        elif proba >= 0.9999:
+        elif proba >= 0.999:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#98D8AA", width=7)
 
 
@@ -585,7 +585,7 @@ if st.button('Display validation set'):
     # val_data.y_indices, val_data.y = neg_sampling(val_data)
     val_proba = model(val_data.x, val_data.y_indices)
     # val_pred = torch.argmax(val_proba, dim=1)
-    val_pred = (val_proba[:,1] >= 0.9999).int()
+    val_pred = (val_proba[:,1] >= 0.999).int()
     val_data['prediction'] = val_pred
     # I am sure
     st.markdown(f'### The accuracy \n \
