@@ -543,12 +543,14 @@ if st.button('Display the predictions'):
 
         artist_net.add_node(src, src, title=src, font_size=60)
         artist_net.add_node(dst, dst, title=dst, font='60px arial black')
-        if proba < 0.7 and  proba >= 0.45:
+        
+        if proba < 0.9999 and  proba >= 0.45:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#F7D060", width=round(proba**2*5)+1)
+        
         elif proba < 0.45:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#FF6D60", width=round(proba**2*5)+1)
-
-        elif proba >= 0.7:
+        
+        elif proba >= 0.99999:
             artist_net.add_edge(src, dst, title=str(round(proba*100, 3))+' %', color="#98D8AA", width=round(proba**2*5)+1)
 
 
@@ -575,7 +577,7 @@ if st.button('Display the predictions'):
     raw_html = base64.b64encode(raw_html).decode()
     components.iframe(f"data:text/html;base64,{raw_html}", height=510)#, width=700)
 
-    st.table(edge_df.sort_values(by='probability', ascending=True)[:30])
+    # st.table(edge_df.sort_values(by='probability', ascending=True)[:30])
 
 
 if st.button('Display validation set'):
